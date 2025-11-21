@@ -1,4 +1,3 @@
-// src/pages/Index.tsx
 import { Headphones } from "lucide-react";
 
 // --- Component Imports ---
@@ -87,19 +86,20 @@ const Index = () => {
       <Header />
 
       <main className="space-y-16">
+
         {/* Hero Section */}
-        <section className="container mx-auto px-6 pt-16">
+        <section className="w-full px-6 pt-16">
           <HeroSection />
         </section>
 
-        {/* Search and Categories */}
-        <section className="container mx-auto px-6 space-y-8">
+        {/* Search + Categories */}
+        <section className="w-full px-6 space-y-8">
           <SearchBar />
           <CategoryNav />
         </section>
 
         {/* Podcast Grid */}
-        <section className="container mx-auto px-6">
+        <section className="w-full px-6">
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-3xl font-bold bg-gradient-to-r from-fuchsia-500 to-pink-500 bg-clip-text text-transparent">
@@ -113,16 +113,15 @@ const Index = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {mockPodcasts.map((podcast) => (
-  <PodcastCard key={podcast.id} podcast={podcast} />
-))}
-          
+              <PodcastCard key={podcast.id} podcast={podcast} />
+            ))}
           </div>
         </section>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-neutral-950/80 backdrop-blur-sm mt-20">
-        <div className="container mx-auto px-6 py-12 text-center space-y-5">
+        <div className="w-full px-6 py-12 text-center space-y-5">
           <div className="flex items-center justify-center gap-2">
             <div className="p-2 rounded-lg bg-gradient-to-r from-fuchsia-500 to-pink-500">
               <Headphones className="h-6 w-6 text-white" />
@@ -136,12 +135,11 @@ const Index = () => {
           </div>
 
           <p className="text-neutral-400 max-w-2xl mx-auto text-sm leading-relaxed">
-            Pods is your all-in-one platform for discovering and listening to podcasts 
-            from Spotify, YouTube, and RSS feeds — unified in one sleek experience.
+            Pods is your all-in-one platform for discovering, listening, and creating podcasts, unified in one sleek experience.
           </p>
 
           <p className="text-xs text-neutral-600">
-            © {new Date().getFullYear()} Pods. All rights reserved.
+            © {new Date().getFullYear()} Pods. All rights (and lefts) reserved.
           </p>
         </div>
       </footer>

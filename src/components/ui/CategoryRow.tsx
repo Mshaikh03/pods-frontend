@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import PodcastCard from "./PodcastCard";
 import PodcastModal from "./PodcastModal";
 import { usePodcastCache } from "@/context/PodcastCacheContext";
@@ -22,16 +22,57 @@ interface Props {
   limit?: number;
 }
 
-export default function CategoryRow({ title, endpoint, limit = 10 }: Props) {
+export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
   const [podcasts, setPodcasts] = useState<Podcast[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Podcast | null>(null);
+
   const { getCache, setCache } = usePodcastCache();
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  // Scroll buttons
+  const scrollRow = (dir: "left" | "right") => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const amount = container.clientWidth * 0.8;
+
+    container.scrollBy({
+      left: dir === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
+
+  // Monitor scroll position for showing/hiding arrows
+  const handleScrollCheck = () => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    const maxScroll = container.scrollWidth - container.clientWidth;
+
+    setAtStart(container.scrollLeft <= 5);
+    setAtEnd(container.scrollLeft >= maxScroll - 5);
+  };
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    handleScrollCheck(); // initialize
+
+    container.addEventListener("scroll", handleScrollCheck);
+    return () => container.removeEventListener("scroll", handleScrollCheck);
+  }, []);
+
+  // Fetch data
   useEffect(() => {
     const cacheKey = `category:${endpoint}`;
     const cached = getCache(cacheKey);
+
     if (cached) {
       setPodcasts(cached);
       setLoading(false);
@@ -53,11 +94,15 @@ export default function CategoryRow({ title, endpoint, limit = 10 }: Props) {
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        const data = await res.json();
+        const raw = await res.json();
         const items =
-          data.feeds || data.podcasts || data.trending || data.items || [];
+          raw.feeds ||
+          raw.podcasts ||
+          raw.trending ||
+          raw.items ||
+          [];
 
-        const clean = items
+        const cleaned = items
           .slice(0, limit)
           .filter((p: any) => p && (p.title || p.id))
           .map((p: any) => ({
@@ -70,8 +115,8 @@ export default function CategoryRow({ title, endpoint, limit = 10 }: Props) {
             description: p.description ?? "",
           }));
 
-        setPodcasts(clean);
-        setCache(cacheKey, clean);
+        setPodcasts(cleaned);
+        setCache(cacheKey, cleaned);
       } catch (err: any) {
         if (err.name !== "AbortError") setError("Failed to load content");
       } finally {
@@ -81,51 +126,80 @@ export default function CategoryRow({ title, endpoint, limit = 10 }: Props) {
 
     fetchData();
     return () => controller.abort();
-  }, [endpoint, title, getCache, setCache, limit]);
-
-  if (loading)
-    return <div className="p-6 text-sm text-gray-400">Loading {title}...</div>;
-
-  if (error)
-    return (
-      <div className="p-6 text-sm text-red-500">
-        {error} ({title})
-      </div>
-    );
-
-  if (!podcasts.length)
-    return (
-      <div className="p-6 text-sm text-gray-500">
-        No podcasts found for {title}.
-      </div>
-    );
+  }, [endpoint, getCache, setCache, limit]);
 
   return (
     <>
       <section className="mt-12 mb-10 px-5 md:px-10">
-        {/* Section title */}
         <h2 className="text-lg md:text-xl font-semibold mb-4 text-gray-100 tracking-tight">
           {title}
         </h2>
 
-        {/* Horizontal scroll row */}
+        {loading && (
+          <div className="text-sm text-neutral-400 py-10">Loading {title}...</div>
+        )}
+
+        {error && !loading && (
+          <div className="text-sm text-red-500 py-10">{error}</div>
+        )}
+
+        {!loading && !error && podcasts.length === 0 && (
+          <div className="text-sm text-neutral-500 py-10">
+            No podcasts found for {title}.
+          </div>
+        )}
+
+{!loading && !error && podcasts.length > 0 && (
+  <div className="relative group w-full">
+
+    {/* Left Arrow */}
+    {!atStart && (
+      <button
+        onClick={() => scrollRow("left")}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-20
+                   bg-neutral-900/80 hover:bg-neutral-800
+                   h-10 w-10 rounded-full flex items-center justify-center
+                   text-white opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Scroll left"
+      >
+        ‹
+      </button>
+    )}
+
+    {/* Scrollable Row */}
+    <div
+      ref={scrollRef}
+      onScroll={handleScrollCheck}
+      className="flex gap-5 md:gap-6 overflow-x-scroll no-scrollbar pb-6 scroll-smooth pr-6"
+    >
+      {podcasts.map((pod) => (
         <div
-          className="flex gap-5 md:gap-6 overflow-x-auto pb-6 scroll-smooth snap-x snap-mandatory
-                     scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-900/30 
-                     hover:scrollbar-thumb-gray-500 transition-all duration-300 rounded-lg"
+          key={pod.id}
+          className="flex-shrink-0 w-28 sm:w-32 md:w-40 lg:w-44
+                     hover:scale-[1.03] transition-transform duration-200 ease-out"
         >
-          {podcasts.map((pod) => (
-            <div
-              key={pod.id}
-              className="flex-shrink-0 w-24 sm:w-28 md:w-32 lg:w-36 snap-start hover:scale-[1.03] transition-transform duration-200 ease-out"
-            >
-              <PodcastCard podcast={pod} onClick={() => setSelected(pod)} />
-            </div>
-          ))}
+          <PodcastCard podcast={pod} onClick={() => setSelected(pod)} />
         </div>
+      ))}
+    </div>
+
+    {/* Right Arrow */}
+    {!atEnd && (
+      <button
+        onClick={() => scrollRow("right")}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-20
+                   bg-neutral-900/80 hover:bg-neutral-800
+                   h-10 w-10 rounded-full flex items-center justify-center
+                   text-white opacity-0 group-hover:opacity-100 transition-opacity"
+        aria-label="Scroll right"
+      >
+        ›
+      </button>
+    )}
+  </div>
+)}
       </section>
 
-      {/* Podcast modal */}
       {selected && (
         <PodcastModal
           open={!!selected}

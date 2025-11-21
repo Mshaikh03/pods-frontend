@@ -1,4 +1,4 @@
-// src/components/ui/PodcastSearch.tsx
+
 import { useEffect, useState } from "react";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 
@@ -26,7 +26,7 @@ export default function PodcastSearch() {
 
   const API_BASE = import.meta.env.VITE_API_BASE?.trim() || "http://127.0.0.1:4000";
 
-  // 🔍 Search podcasts
+  // Search podcasts
   const search = async () => {
     try {
       const res = await fetch(`${API_BASE}/podcasts/search?q=${encodeURIComponent(term)}`);
@@ -40,7 +40,7 @@ export default function PodcastSearch() {
     }
   };
 
-  // ❤️ Like or dislike handler (per podcast)
+  // like or dislike handler (per podcast)
   const handleLike = async (podcastId: string | number, likedValue: boolean) => {
     setLikedMap((prev) => ({ ...prev, [podcastId]: likedValue }));
     try {
@@ -54,7 +54,7 @@ export default function PodcastSearch() {
     }
   };
 
-  // 🎧 Load episodes for a specific podcast
+  // Load episodes for a specific podcast
   const loadEpisodes = async (feedId: string | number) => {
     try {
       const res = await fetch(`${API_BASE}/podcasts/episodes?feedId=${feedId}`);
@@ -67,7 +67,7 @@ export default function PodcastSearch() {
     }
   };
 
-  // 🚀 Initial search
+  // Initial search
   useEffect(() => {
     search();
     // eslint-disable-next-line react-hooks/exhaustive-deps

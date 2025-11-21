@@ -8,17 +8,17 @@ import {
 } from "@/components/ui/dialog";
 import { ThumbsUp, ThumbsDown } from "lucide-react";
 
-/** ---------- TYPES ---------- */
+/** Types */
 interface Podcast {
   id: number | string;
   title: string;
   author?: string;
   image?: string;
-  link?: string;       // often homepage
-  url?: string;        // sometimes homepage
-  feedUrl?: string;    // RSS feed when provided by API
+  link?: string;       
+  url?: string;        
+  feedUrl?: string;    
   description?: string;
-  reasoning?: string;  // optional “why AI chose this”
+  reasoning?: string;  // “why AI chose this”
 }
 
 interface Episode {
@@ -39,11 +39,11 @@ interface Props {
   podcast: Podcast | null;
 }
 
-/** ---------- CONFIG ---------- */
-const RAW_API_BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:4000";
+/**  CONFIG  */
+const RAW_API_BASE = import.meta.env.VITE_API_BASE ?? "https://pods-backend-kom3.onrender.com";
 const API_BASE = RAW_API_BASE.replace(/\/+$/, "");
 
-/** ---------- HELPERS ---------- */
+/** Helpers */
 const formatDate = (dateStr?: string | null) => {
   if (!dateStr) return "Unknown Date";
   const d = new Date(dateStr);
@@ -52,7 +52,7 @@ const formatDate = (dateStr?: string | null) => {
     : d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 };
 
-// We treat URLs defensively since PodcastIndex and AI results vary
+// URLs treated defensively since PodcastIndex and AI results vary
 const normalizeUrl = (u?: string | null) => {
   if (!u) return "";
   if (/^https?:\/\//i.test(u)) return u.replace(/^http:\/\//i, "https://");
@@ -66,8 +66,8 @@ const looksLikeMedia = (u: string) =>
   /\.(mp3|m4a|aac|wav|ogg|oga|flac|mp4|m4v)$/i.test(u);
 
 /** Resolve the best feed URL.
- * Priority: feedUrl -> url -> link. If what we have is not an RSS-looking URL,
- * try to resolve via the search endpoint (server maps to PodcastIndex) and pick the matching feed.feedUrl.
+ * Priority: feedUrl -> url -> link. If  not an RSS-looking URL,
+ * resolve via the search endpoint (server maps to PodcastIndex) and pick the matching feed.feedUrl.
  */
 async function resolveFeedUrl(podcast: Podcast, signal?: AbortSignal): Promise<string | null> {
   const firstGuess =
@@ -77,7 +77,7 @@ async function resolveFeedUrl(podcast: Podcast, signal?: AbortSignal): Promise<s
 
   if (firstGuess && looksLikeRss(firstGuess)) return firstGuess;
 
-  // Fall back to server search to resolve a proper feedUrl
+  // Fall back to server search 
   if (!podcast?.title) return firstGuess || null;
 
   const searchRes = await fetch(
@@ -111,7 +111,7 @@ async function resolveFeedUrl(podcast: Podcast, signal?: AbortSignal): Promise<s
   return resolved;
 }
 
-/** ---------- COMPONENT ---------- */
+/** COMPONENT */
 export default function PodcastModal({ open, onClose, podcast }: Props) {
   const [episodes, setEpisodes] = useState<Episode[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -126,7 +126,7 @@ export default function PodcastModal({ open, onClose, podcast }: Props) {
 
   const baseGuess = useMemo(() => {
     if (!podcast) return "";
-    // Prefer explicit feedUrl if provided by AI discover
+    
     const guess =
       podcast.feedUrl || podcast.url || podcast.link || "";
     return normalizeUrl(guess);
@@ -169,7 +169,7 @@ export default function PodcastModal({ open, onClose, podcast }: Props) {
         setLoading(true);
         setError(null);
 
-        // Resolve a real feed URL (search fallback if needed)
+        // R real feed URL (search fallback if needed)
         const feedUrl =
           (baseGuess && looksLikeRss(baseGuess) && baseGuess) ||
           (await resolveFeedUrl(podcast, controller.signal));
@@ -186,7 +186,7 @@ export default function PodcastModal({ open, onClose, podcast }: Props) {
           return;
         }
 
-        // Fetch episodes from backend (backend already has RSS parser + PodcastIndex fallback)
+        // Fetch episodes from backend 
         const res = await fetch(
           `${API_BASE}/episodes?feedUrl=${encodeURIComponent(feedUrl)}`,
           { signal: controller.signal }

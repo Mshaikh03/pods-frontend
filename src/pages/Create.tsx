@@ -129,7 +129,7 @@ const Create: React.FC = () => {
     }
   };
 
-  // --- Playback wiring ---
+  // Playback wiring
   useEffect(() => {
     if (!audioRef.current) return;
     const a = audioRef.current;
@@ -161,7 +161,7 @@ const Create: React.FC = () => {
     setMessage("File selected. Ready to publish.");
   };
 
-  // --- Upload to backend (server will store to Supabase/DB) ---
+  // Upload to backend (Supabase/DB) 
   const handleUpload = async () => {
     if (!audioBlob) {
       setMessage("Please record or upload audio before publishing.");
@@ -271,7 +271,7 @@ const Create: React.FC = () => {
         </div>
       </section>
 
-      {/* Learn row (uses the SAME search endpoint as Home) */}
+      {/* Learn row */}
       {showLearnRow && (
         <div className="w-full max-w-6xl mb-10">
           <CategoryRow

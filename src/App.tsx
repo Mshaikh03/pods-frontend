@@ -56,14 +56,14 @@ const Home: React.FC = () => {
   }, []);
 
   // Backend endpoints
-  const endpoints = {
-    search: (q: string) => `${API_BASE}/search/${encodeURIComponent(q)}`,
-    trending: `${API_BASE}/trending`,
-    sports: `${API_BASE}/search/sports`,
-    news: `${API_BASE}/search/news`,
-    truecrime: `${API_BASE}/search/truecrime`,
-    technology: `${API_BASE}/search/technology`,
-    lifestyle: `${API_BASE}/search/lifestyle`,
+const endpoints = {
+  search: (q: string) => `${API_BASE}/search/${encodeURIComponent(q)}`,
+  trending: `${API_BASE}/trending`,
+  sports: `${API_BASE}/search/sports`,
+  news: `${API_BASE}/search/news`,
+  truecrime: `${API_BASE}/search/truecrime`,
+  technology: `${API_BASE}/search/technology`,
+  lifestyle: `${API_BASE}/search/lifestyle`,
   };
 
   return (
@@ -85,8 +85,9 @@ const Home: React.FC = () => {
             </h1>
           </NavLink>
 
-          <p className="text-neutral-400 text-lg max-w-md mx-auto mt-4">
-            The world’s first all-inclusive podcast platform — Discover, Listen, and Create.
+          <p className="text-neutral-400 text-lg max-w-md mx-auto mt-5">
+            The world’s first all-in-one podcast platform
+            for you to Discover, Listen, and Create.
           </p>
 
           <div className="w-full mt-6 flex justify-center">
@@ -121,7 +122,7 @@ const Home: React.FC = () => {
       </section>
 
       {/* Main content */}
-      <main className="max-w-7xl mx-auto px-6 pb-16 space-y-12">
+      <main className="w-full px-4 md:px-6 lg:px-10 pb-16 space-y-12">
         {/* Show search results when searching */}
         {searchQuery ? (
           <CategoryRow
@@ -133,39 +134,56 @@ const Home: React.FC = () => {
         ) : (
           <>
             {/* Category selector */}
-            <div className="flex flex-wrap justify-center gap-3 mb-8">
-              {[
-                "Business",
-                "Health",
-                "Comedy",
-                "History",
-                "Science",
-                "Finance",
-                "Self-Improvement",
-                "Lifestyle",
-              ].map((category) => {
-                const isActive = selectedCategory === category;
+<div className="flex flex-wrap justify-center gap-3 mb-8">
 
-                return (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      setSearchQuery(category);
-                    }}
-                    className={
-                      "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
-                      (isActive
-                        ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
-                        : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
-                    }
-                  >
-                    {category}
-                  </button>
-                );
-              })}
-            </div>
+  {/* HOME OPTION */}
+  <button
+    onClick={() => {
+      setSelectedCategory("Home");
+      setSearchQuery(""); // reset search
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }}
+    className={
+      "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
+      (selectedCategory === "Home"
+        ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
+        : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
+    }
+  >
+    Home
+  </button>
 
+  {[
+    "Business",
+    "Health",
+    "Comedy",
+    "History",
+    "Science",
+    "Finance",
+    "Self-Improvement",
+    "Lifestyle",
+  ].map((category) => {
+    const isActive = selectedCategory === category;
+
+    return (
+      <button
+        key={category}
+        onClick={() => {
+          setSelectedCategory(category);
+          setSearchQuery(category);
+        }}
+        className={
+          "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
+          (isActive
+            ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
+            : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
+        }
+      >
+        {category}
+      </button>
+    );
+  })}
+</div>
             {/* Default rows */}
             <CategoryRow title="Trending" endpoint={endpoints.trending} />
             <CategoryRow title="Sports" endpoint={endpoints.sports} />
