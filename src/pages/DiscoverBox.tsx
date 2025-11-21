@@ -251,7 +251,7 @@ const DiscoverBox: React.FC = () => {
       <div className="mt-16 w-full flex flex-col items-center gap-6">
 
        <p className="text-neutral-400 text-sm max-w-md text-center leading-relaxed">
-          Pods... found these podcasts based on your search. Listen to a match or skip to discover the next recommendation.
+          PodsAi found these podcasts based on your search. Listen to a match or skip to discover the next recommendation.
        </p>
 
       <SwipeCard

@@ -34,7 +34,16 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(false);
 
-  // Scroll buttons
+  // Reset scroll when category changes
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollLeft = 0;
+      setAtStart(true);
+      setAtEnd(false);
+    }
+  }, [endpoint]);
+
+  // Scroll arrows
   const scrollRow = (dir: "left" | "right") => {
     const container = scrollRef.current;
     if (!container) return;
@@ -47,23 +56,22 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
     });
   };
 
-  // Monitor scroll position for showing/hiding arrows
   const handleScrollCheck = () => {
     const container = scrollRef.current;
     if (!container) return;
 
     const maxScroll = container.scrollWidth - container.clientWidth;
+    const pos = container.scrollLeft;
 
-    setAtStart(container.scrollLeft <= 5);
-    setAtEnd(container.scrollLeft >= maxScroll - 5);
+    setAtStart(pos <= 5);
+    setAtEnd(pos >= maxScroll - 5);
   };
 
   useEffect(() => {
     const container = scrollRef.current;
     if (!container) return;
 
-    handleScrollCheck(); // initialize
-
+    handleScrollCheck();
     container.addEventListener("scroll", handleScrollCheck);
     return () => container.removeEventListener("scroll", handleScrollCheck);
   }, []);
@@ -71,8 +79,8 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
   // Fetch data
   useEffect(() => {
     const cacheKey = `category:${endpoint}`;
-    const cached = getCache(cacheKey);
 
+    const cached = getCache(cacheKey);
     if (cached) {
       setPodcasts(cached);
       setLoading(false);
@@ -81,20 +89,22 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
 
     const controller = new AbortController();
 
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
         setLoading(true);
         setError(null);
 
+        const cleanEndpoint = endpoint.replace(/^\/+/, "");
         const url =
           endpoint.startsWith("http") || endpoint.startsWith(API_BASE)
             ? endpoint
-            : `${API_BASE}/${endpoint.replace(/^\/+/, "")}`;
+            : `${API_BASE}/${cleanEndpoint}`;
 
         const res = await fetch(url, { signal: controller.signal });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         const raw = await res.json();
+
         const items =
           raw.feeds ||
           raw.podcasts ||
@@ -118,15 +128,17 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
         setPodcasts(cleaned);
         setCache(cacheKey, cleaned);
       } catch (err: any) {
-        if (err.name !== "AbortError") setError("Failed to load content");
+        if (err.name !== "AbortError") {
+          setError("Failed to load content");
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    fetchData();
+    loadData();
     return () => controller.abort();
-  }, [endpoint, getCache, setCache, limit]);
+  }, [endpoint, limit, getCache, setCache]);
 
   return (
     <>
@@ -136,7 +148,9 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
         </h2>
 
         {loading && (
-          <div className="text-sm text-neutral-400 py-10">Loading {title}...</div>
+          <div className="text-sm text-neutral-400 py-10">
+            Loading {title}...
+          </div>
         )}
 
         {error && !loading && (
@@ -149,55 +163,52 @@ export default function CategoryRow({ title, endpoint, limit = 20 }: Props) {
           </div>
         )}
 
-{!loading && !error && podcasts.length > 0 && (
-  <div className="relative group w-full">
+        {!loading && !error && podcasts.length > 0 && (
+          <div className="relative group w-full">
+            {/* Left Arrow */}
+            {!atStart && (
+              <button
+                onClick={() => scrollRow("left")}
+                className="absolute left-0 top-1/2 -translate-y-1/2 z-20
+                  bg-neutral-900/80 hover:bg-neutral-800
+                  h-10 w-10 rounded-full flex items-center justify-center
+                  text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                ‹
+              </button>
+            )}
 
-    {/* Left Arrow */}
-    {!atStart && (
-      <button
-        onClick={() => scrollRow("left")}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-20
-                   bg-neutral-900/80 hover:bg-neutral-800
-                   h-10 w-10 rounded-full flex items-center justify-center
-                   text-white opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label="Scroll left"
-      >
-        ‹
-      </button>
-    )}
+            {/* Scrollable container */}
+            <div
+              ref={scrollRef}
+              onScroll={handleScrollCheck}
+              className="flex gap-5 md:gap-6 overflow-x-scroll no-scrollbar pb-6 scroll-smooth pr-6"
+            >
+              {podcasts.map((pod) => (
+                <div
+                  key={pod.id}
+                  className="flex-shrink-0 w-28 sm:w-32 md:w-40 lg:w-44
+                    hover:scale-[1.03] transition-transform duration-200 ease-out"
+                >
+                  <PodcastCard podcast={pod} onClick={() => setSelected(pod)} />
+                </div>
+              ))}
+            </div>
 
-    {/* Scrollable Row */}
-    <div
-      ref={scrollRef}
-      onScroll={handleScrollCheck}
-      className="flex gap-5 md:gap-6 overflow-x-scroll no-scrollbar pb-6 scroll-smooth pr-6"
-    >
-      {podcasts.map((pod) => (
-        <div
-          key={pod.id}
-          className="flex-shrink-0 w-28 sm:w-32 md:w-40 lg:w-44
-                     hover:scale-[1.03] transition-transform duration-200 ease-out"
-        >
-          <PodcastCard podcast={pod} onClick={() => setSelected(pod)} />
-        </div>
-      ))}
-    </div>
-
-    {/* Right Arrow */}
-    {!atEnd && (
-      <button
-        onClick={() => scrollRow("right")}
-        className="absolute right-0 top-1/2 -translate-y-1/2 z-20
-                   bg-neutral-900/80 hover:bg-neutral-800
-                   h-10 w-10 rounded-full flex items-center justify-center
-                   text-white opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label="Scroll right"
-      >
-        ›
-      </button>
-    )}
-  </div>
-)}
+            {/* Right Arrow */}
+            {!atEnd && (
+              <button
+                onClick={() => scrollRow("right")}
+                className="absolute right-0 top-1/2 -translate-y-1/2 z-20
+                  bg-neutral-900/80 hover:bg-neutral-800
+                  h-10 w-10 rounded-full flex items-center justify-center
+                  text-white opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                ›
+              </button>
+            )}
+          </div>
+        )}
       </section>
 
       {selected && (

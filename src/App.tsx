@@ -121,85 +121,88 @@ const endpoints = {
         </div>
       </section>
 
-      {/* Main content */}
-      <main className="w-full px-4 md:px-6 lg:px-10 pb-16 space-y-12">
-        {/* Show search results when searching */}
-        {searchQuery ? (
-          <CategoryRow
-            title={`Search Results for "${searchQuery}"`}
-            endpoint={endpoints.search(searchQuery)}
-          />
-        ) : loading ? (
-          <p className="text-center text-neutral-500">Loading podcasts...</p>
-        ) : (
-          <>
-            {/* Category selector */}
-<div className="flex flex-wrap justify-center gap-3 mb-8">
+{/* Main content */}
+<main className="w-full px-4 md:px-6 lg:px-10 pb-16 space-y-12">
 
-  {/* HOME OPTION */}
-  <button
-    onClick={() => {
-      setSelectedCategory("Home");
-      setSearchQuery(""); // reset search
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }}
-    className={
-      "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
-      (selectedCategory === "Home"
-        ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
-        : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
-    }
-  >
-    Home
-  </button>
+  {/* Category selector – always visible */}
+  <div className="flex flex-wrap justify-center gap-3 mb-8 mt-6">
 
-  {[
-    "Business",
-    "Health",
-    "Comedy",
-    "History",
-    "Science",
-    "Finance",
-    "Self-Improvement",
-    "Lifestyle",
-  ].map((category) => {
-    const isActive = selectedCategory === category;
+    {/* HOME OPTION */}
+    <button
+      onClick={() => {
+        setSelectedCategory("Home");
+        setSearchQuery("");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }}
+      className={
+        "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
+        (selectedCategory === "Home"
+          ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
+          : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
+      }
+    >
+      Home
+    </button>
 
-    return (
-      <button
-        key={category}
-        onClick={() => {
-          setSelectedCategory(category);
-          setSearchQuery(category);
-        }}
-        className={
-          "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
-          (isActive
-            ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
-            : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
-        }
-      >
-        {category}
-      </button>
-    );
-  })}
-</div>
-            {/* Default rows */}
-            <CategoryRow title="Trending" endpoint={endpoints.trending} />
-            <CategoryRow title="Sports" endpoint={endpoints.sports} />
-            <CategoryRow title="News" endpoint={endpoints.news} />
-            <CategoryRow title="True Crime" endpoint={endpoints.truecrime} />
-            <CategoryRow title="Technology" endpoint={endpoints.technology} />
-            <CategoryRow title="Lifestyle" endpoint={endpoints.lifestyle} />
-          </>
-        )}
-      </main>
+    {[
+      "Business",
+      "Health",
+      "Comedy",
+      "History",
+      "Science",
+      "Finance",
+      "Self-Improvement",
+      "Lifestyle",
+    ].map((category) => {
+      const isActive = selectedCategory === category;
+
+      return (
+        <button
+          key={category}
+          onClick={() => {
+            setSelectedCategory(category);
+            setSearchQuery(category);
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }}
+          className={
+            "px-4 py-2 text-sm font-medium rounded-full border transition-colors " +
+            (isActive
+              ? "bg-gradient-to-r from-fuchsia-500 to-pink-500 text-white border-fuchsia-700 shadow"
+              : "border-neutral-700 bg-neutral-800/60 text-neutral-300 hover:bg-neutral-700")
+          }
+        >
+          {category}
+        </button>
+      );
+    })}
+  </div>
+
+  {/* Dynamic Content */}
+  {loading ? (
+    <p className="text-center text-neutral-500">Loading podcasts...</p>
+  ) : searchQuery ? (
+    <CategoryRow
+      title={`Search Results for "${searchQuery}"`}
+      endpoint={endpoints.search(searchQuery)}
+    />
+  ) : (
+    <>
+      <CategoryRow title="Trending" endpoint={endpoints.trending} />
+      <CategoryRow title="Sports" endpoint={endpoints.sports} />
+      <CategoryRow title="News" endpoint={endpoints.news} />
+      <CategoryRow title="True Crime" endpoint={endpoints.truecrime} />
+      <CategoryRow title="Technology" endpoint={endpoints.technology} />
+      <CategoryRow title="Lifestyle" endpoint={endpoints.lifestyle} />
+    </>
+  )}
+
+</main>
 
       {/* Footer */}
       <footer className="border-t border-white/10 bg-neutral-950">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <p className="text-center text-white/40 text-sm">
-            Pods — Connected to {API_BASE}
+            Help us make Pods even better by submitting this feedback form and sharing Pods with you friends! (Coming soon to IOS and Android)
           </p>
         </div>
       </footer>
