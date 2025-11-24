@@ -40,7 +40,7 @@ interface AIPodcast {
 }
 
 const SUGGESTIONS = [
-  "New Developments in AI",
+  "Everything AI",
   "Space Exploration Podcasts",
   "Learn how to Invest",
   "UFC Analysis",
